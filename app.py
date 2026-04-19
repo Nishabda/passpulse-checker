@@ -67,9 +67,13 @@ html, body,
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 0 40px;
-    border-bottom: 1px solid #1a1a1a;
+    padding: 16px 0;
+    border-bottom: 1px solid #1e1e1e;
     margin-bottom: 40px;
+    position: sticky;
+    top: 0;
+    background: #0d0d0d;
+    z-index: 100;
 }
 .pp-badge {
     font-size: 11px;
@@ -81,9 +85,11 @@ html, body,
     padding: 3px 10px;
     letter-spacing: 0.02em;
     position: relative;
-    cursor: default;
+    cursor: pointer;
+    user-select: none;
 }
-.pp-badge:hover .pp-tooltip { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.pp-badge .pp-tooltip { opacity: 0; pointer-events: none; transform: translateY(-4px); }
+.pp-badge.open .pp-tooltip { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .pp-tooltip {
     position: absolute;
     top: calc(100% + 10px);
@@ -93,9 +99,6 @@ html, body,
     border-radius: 10px;
     padding: 12px 14px;
     width: 230px;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-4px);
     transition: opacity 0.2s ease, transform 0.2s ease;
     z-index: 999;
     text-align: left;
@@ -638,9 +641,9 @@ def gen_password(length=20, upper=True, digits=True, special=True):
 st.markdown("""
 <div class="pp-topbar">
     <div class="pp-wordmark" onclick="window.scrollTo({top:0,behavior:'smooth'});" style="cursor:pointer;">Pass<span>Pulse</span></div>
-    <div class="pp-badge">
+    <div class="pp-badge" id="pp-badge" onclick="toggleTooltip(event)">
         Password Checker
-        <div class="pp-tooltip">
+        <div class="pp-tooltip" id="pp-tooltip">
             <div class="pp-tooltip-row">
                 <span class="pp-tooltip-icon">🔒</span>
                 <span>Your passwords are never stored or transmitted in full</span>
@@ -655,11 +658,20 @@ st.markdown("""
             </div>
             <div class="pp-tooltip-row">
                 <span class="pp-tooltip-icon">🐙</span>
-                <span><a href="https://github.com/Nishabda" target="_blank">github.com/Nishabda</a></span>
+                <span><a href="https://github.com/Nishabda" target="_blank" onclick="event.stopPropagation()">github.com/Nishabda</a></span>
             </div>
         </div>
     </div>
 </div>
+<script>
+function toggleTooltip(e) {
+    e.stopPropagation();
+    document.getElementById('pp-badge').classList.toggle('open');
+}
+document.addEventListener('click', function() {
+    document.getElementById('pp-badge').classList.remove('open');
+});
+</script>
 """, unsafe_allow_html=True)
 
 # Headline
