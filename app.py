@@ -67,8 +67,8 @@ html, body,
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 0 16px;
-    border-bottom: 1px solid #1e1e1e;
+    padding: 20px 0 40px;
+    border-bottom: 1px solid #1a1a1a;
     margin-bottom: 40px;
 }
 .pp-badge {
@@ -80,7 +80,40 @@ html, body,
     border-radius: 99px;
     padding: 3px 10px;
     letter-spacing: 0.02em;
+    position: relative;
+    cursor: default;
 }
+.pp-badge:hover .pp-tooltip { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.pp-tooltip {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 12px 14px;
+    width: 230px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 999;
+    text-align: left;
+}
+.pp-tooltip-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #1e1e1e;
+    font-size: 12px;
+    color: #888;
+    line-height: 1.5;
+}
+.pp-tooltip-row:last-child { border-bottom: none; }
+.pp-tooltip-icon { font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+.pp-tooltip a { color: #5b6af0; text-decoration: none; }
+.pp-tooltip a:hover { text-decoration: underline; }
 
 .pp-section { margin-bottom: 10px; }
 
@@ -604,16 +637,30 @@ def gen_password(length=20, upper=True, digits=True, special=True):
 # Top bar
 st.markdown("""
 <div class="pp-topbar">
-    <div class="pp-wordmark">Pass<span>Pulse</span></div>
+    <div class="pp-wordmark" onclick="window.scrollTo({top:0,behavior:'smooth'});" style="cursor:pointer;">Pass<span>Pulse</span></div>
+    <div class="pp-badge">
+        Password Checker
+        <div class="pp-tooltip">
+            <div class="pp-tooltip-row">
+                <span class="pp-tooltip-icon">🔒</span>
+                <span>Your passwords are never stored or transmitted in full</span>
+            </div>
+            <div class="pp-tooltip-row">
+                <span class="pp-tooltip-icon">⚡</span>
+                <span>Real-time strength analysis powered by entropy scoring</span>
+            </div>
+            <div class="pp-tooltip-row">
+                <span class="pp-tooltip-icon">👤</span>
+                <span>Built by Nishabda Shrestha</span>
+            </div>
+            <div class="pp-tooltip-row">
+                <span class="pp-tooltip-icon">🐙</span>
+                <span><a href="https://github.com/Nishabda" target="_blank">github.com/Nishabda</a></span>
+            </div>
+        </div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
-
-# Popover badge — native Streamlit, works reliably
-with st.popover("Password Checker ▾", use_container_width=False):
-    st.markdown("🔒 &nbsp; Your passwords are never stored or transmitted in full", unsafe_allow_html=True)
-    st.markdown("⚡ &nbsp; Real-time strength analysis powered by entropy scoring", unsafe_allow_html=True)
-    st.markdown("👤 &nbsp; Built by Nishabda Shrestha", unsafe_allow_html=True)
-    st.markdown("🐙 &nbsp; [github.com/Nishabda](https://github.com/Nishabda)", unsafe_allow_html=True)
 
 # Headline
 st.markdown("""
