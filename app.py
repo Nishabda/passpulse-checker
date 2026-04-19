@@ -7,588 +7,676 @@ import math
 import re
 
 st.set_page_config(
-    page_title="PassPulse — Password Strength Checker",
+    page_title="PassPulse",
     page_icon="🔐",
     layout="centered",
 )
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body, [data-testid="stAppViewContainer"] {
-    background: #0a0a0f;
-    color: #e8e8f0;
-    font-family: 'Syne', sans-serif;
-}
-[data-testid="stAppViewContainer"] {
-    background:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,255,180,0.07), transparent),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(80,0,255,0.05), transparent),
-        #0a0a0f;
-}
-[data-testid="stMain"] { padding: 0 1rem; }
-
-#MainMenu, footer, header { visibility: hidden; }
-[data-testid="stDecoration"] { display: none; }
-
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #0a0a0f; }
-::-webkit-scrollbar-thumb { background: #00ffb4; border-radius: 2px; }
-
-.hero { text-align: center; padding: 2rem 0 1.2rem; }
-.hero-tag {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.25em;
-    color: #00ffb4;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-}
-.hero-title {
-    font-size: clamp(2.2rem, 8vw, 3.2rem);
-    font-weight: 800;
-    line-height: 1.05;
-    background: linear-gradient(135deg, #ffffff 0%, #00ffb4 60%, #8b5cf6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.02em;
-}
-.hero-sub {
-    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
-    color: #6b7280;
-    margin-top: 0.5rem;
-    font-family: 'Share Tech Mono', monospace;
-}
-
-.card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 1.4rem 1.6rem;
-    margin: 0.8rem 0;
-}
-.card-title {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: #00ffb4;
-    text-transform: uppercase;
-    margin-bottom: 0.9rem;
-}
-
-.bar-wrap {
-    background: rgba(255,255,255,0.06);
-    border-radius: 999px;
-    height: 10px;
-    overflow: hidden;
-    margin: 0.5rem 0 0.3rem;
-}
-.bar-fill { height: 100%; border-radius: 999px; }
-
-.score-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.28rem 0.85rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    font-family: 'Share Tech Mono', monospace;
-}
-
-.metric-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.7rem;
-    margin: 0.8rem 0;
-}
-@media (max-width: 480px) {
-    .metric-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-}
-.metric-box {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    padding: 0.9rem 0.6rem;
-    text-align: center;
-}
-.metric-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.58rem;
-    color: #6b7280;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 0.25rem;
-}
-.metric-value {
-    font-size: clamp(0.95rem, 3vw, 1.2rem);
-    font-weight: 700;
-    color: #e8e8f0;
-    word-break: break-word;
-}
-
-.check-item {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    padding: 0.3rem 0;
-    font-size: clamp(0.75rem, 2.5vw, 0.85rem);
-    font-family: 'Share Tech Mono', monospace;
-}
-.check-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-
-.suggestion {
-    background: rgba(251,191,36,0.07);
-    border-left: 3px solid #fbbf24;
-    border-radius: 0 8px 8px 0;
-    padding: 0.5rem 0.75rem;
-    margin: 0.35rem 0;
-    font-size: clamp(0.75rem, 2.5vw, 0.83rem);
-    color: #fcd34d;
-    font-family: 'Share Tech Mono', monospace;
-    line-height: 1.5;
-}
-
-.breach-safe {
-    background: rgba(52,211,153,0.08);
-    border: 1px solid rgba(52,211,153,0.3);
-    border-radius: 10px;
-    padding: 0.8rem 1rem;
-    color: #34d399;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.83rem;
-    margin-top: 0.7rem;
-    line-height: 1.5;
-}
-.breach-danger {
-    background: rgba(248,113,113,0.08);
-    border: 1px solid rgba(248,113,113,0.3);
-    border-radius: 10px;
-    padding: 0.8rem 1rem;
-    color: #f87171;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.83rem;
-    margin-top: 0.7rem;
-    line-height: 1.5;
-}
-
-.gen-box {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid #00ffb4;
-    border-radius: 10px;
-    padding: 1rem 1.1rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: clamp(0.85rem, 2.5vw, 1rem);
-    color: #00ffb4;
-    letter-spacing: 0.04em;
-    word-break: break-all;
-    text-align: center;
-    margin: 0.8rem 0 0.4rem;
+html, body,
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+[data-testid="block-container"] {
+    background-color: #0d0d0d !important;
+    color: #ededed;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
     line-height: 1.6;
 }
 
-.tip-box {
-    background: rgba(139,92,246,0.08);
-    border: 1px solid rgba(139,92,246,0.25);
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.78rem;
-    color: #a78bfa;
-    margin-top: 0.5rem;
-    line-height: 1.5;
+[data-testid="stMain"] > div { padding-top: 0 !important; }
+[data-testid="block-container"] { padding: 0 1.5rem 3rem !important; max-width: 640px !important; }
+
+#MainMenu, footer, header,
+[data-testid="stDecoration"],
+[data-testid="stToolbar"] { display: none !important; visibility: hidden !important; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 99px; }
+
+/* ── Typography ── */
+.pp-wordmark {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ededed;
+    letter-spacing: -0.01em;
+}
+.pp-wordmark span { color: #5b6af0; }
+
+.pp-headline {
+    font-size: clamp(28px, 6vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: #ffffff;
+}
+.pp-sub {
+    font-size: 13px;
+    color: #555;
+    margin-top: 6px;
+    letter-spacing: 0.01em;
 }
 
-.empty-state {
-    text-align: center;
-    padding: 2.5rem 1rem;
-    color: #2d3748;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.82rem;
-    line-height: 2;
+/* ── Layout ── */
+.pp-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 40px;
+    border-bottom: 1px solid #1a1a1a;
+    margin-bottom: 40px;
 }
-.empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-
-.divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
-    margin: 1.2rem 0;
+.pp-badge {
+    font-size: 11px;
+    font-weight: 500;
+    color: #444;
+    background: #181818;
+    border: 1px solid #222;
+    border-radius: 99px;
+    padding: 3px 10px;
+    letter-spacing: 0.02em;
 }
 
-/* Streamlit overrides */
+.pp-section { margin-bottom: 10px; }
+
+.pp-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+}
+
+/* ── Input ── */
 [data-testid="stTextInput"] > div > div > input {
-    background: rgba(255,255,255,0.04) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
+    background: #111 !important;
+    border: 1px solid #222 !important;
     border-radius: 10px !important;
-    color: #e8e8f0 !important;
-    font-family: 'Share Tech Mono', monospace !important;
-    font-size: 1rem !important;
-    padding: 0.7rem 1rem !important;
-    caret-color: #00ffb4;
+    color: #ededed !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    padding: 12px 16px !important;
     width: 100% !important;
+    transition: border-color 0.15s ease !important;
+    caret-color: #5b6af0;
+    letter-spacing: 0.02em;
 }
 [data-testid="stTextInput"] > div > div > input:focus {
-    border-color: #00ffb4 !important;
-    box-shadow: 0 0 0 2px rgba(0,255,180,0.12) !important;
+    border-color: #2d2d2d !important;
+    box-shadow: 0 0 0 3px rgba(91,106,240,0.08) !important;
     outline: none !important;
 }
-/* Hide the default streamlit eye toggle on password field */
-[data-testid="stTextInput"] button {
-    display: none !important;
+[data-testid="stTextInput"] > div > div > input::placeholder { color: #333 !important; }
+[data-testid="stTextInput"] button { display: none !important; }
+[data-testid="stTextInput"] label { display: none !important; }
+
+/* ── Strength bar ── */
+.pp-bar-track {
+    height: 3px;
+    background: #1a1a1a;
+    border-radius: 99px;
+    overflow: hidden;
+    margin: 16px 0 6px;
+}
+.pp-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
 }
 
+/* ── Score row ── */
+.pp-score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+.pp-grade {
+    font-size: 13px;
+    font-weight: 500;
+}
+.pp-score-num {
+    font-size: 12px;
+    color: #444;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Stat grid ── */
+.pp-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 24px 0;
+}
+.pp-stat {
+    background: #111;
+    border: 1px solid #1c1c1c;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+.pp-stat-label {
+    font-size: 11px;
+    color: #444;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
+}
+.pp-stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ededed;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+/* ── Divider ── */
+.pp-divider {
+    height: 1px;
+    background: #1a1a1a;
+    margin: 28px 0;
+}
+
+/* ── Checklist ── */
+.pp-checks { display: flex; flex-direction: column; gap: 2px; }
+.pp-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid #141414;
+    font-size: 13px;
+}
+.pp-check:last-child { border-bottom: none; }
+.pp-check-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    font-weight: 700;
+}
+.pp-check-pass { background: rgba(52,211,153,0.1); color: #34d399; }
+.pp-check-fail { background: rgba(239,68,68,0.1); color: #ef4444; }
+.pp-check-text-pass { color: #aaa; }
+.pp-check-text-fail { color: #555; }
+
+/* ── Suggestions ── */
+.pp-suggestions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.pp-suggestion {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #111;
+    border: 1px solid #1c1c1c;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #888;
+    line-height: 1.5;
+}
+.pp-suggestion-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #f59e0b;
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+.pp-suggestion-ok { color: #34d399; }
+.pp-suggestion-dot-ok { background: #34d399; }
+
+/* ── Breach ── */
+.pp-breach {
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 12px;
+}
+.pp-breach-safe {
+    background: rgba(52,211,153,0.05);
+    border: 1px solid rgba(52,211,153,0.15);
+    color: #6ee7b7;
+}
+.pp-breach-danger {
+    background: rgba(239,68,68,0.05);
+    border: 1px solid rgba(239,68,68,0.15);
+    color: #fca5a5;
+}
+.pp-breach-note {
+    font-size: 12px;
+    color: #333;
+    margin-bottom: 14px;
+    line-height: 1.6;
+}
+
+/* ── Generator ── */
+.pp-gen-output {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 16px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 14px;
+    color: #ededed;
+    word-break: break-all;
+    line-height: 1.7;
+    margin: 14px 0 8px;
+    letter-spacing: 0.03em;
+}
+.pp-gen-meta {
+    font-size: 12px;
+    color: #333;
+    margin-top: 6px;
+}
+.pp-gen-meta span { color: #555; }
+
+/* ── Buttons ── */
 [data-testid="stButton"] > button {
-    background: linear-gradient(135deg, #00ffb4, #06b6d4) !important;
-    color: #0a0a0f !important;
-    border: none !important;
-    border-radius: 10px !important;
-    font-family: 'Syne', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 0.88rem !important;
-    padding: 0.6rem 1.4rem !important;
+    background: #181818 !important;
+    color: #ccc !important;
+    border: 1px solid #252525 !important;
+    border-radius: 8px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    padding: 9px 16px !important;
     width: 100% !important;
-    transition: opacity 0.2s !important;
+    transition: background 0.15s, border-color 0.15s, color 0.15s !important;
+    letter-spacing: 0.01em !important;
+    cursor: pointer !important;
 }
-[data-testid="stButton"] > button:hover { opacity: 0.85 !important; }
-
-[data-testid="stCheckbox"] > label {
-    color: #9ca3af !important;
-    font-family: 'Share Tech Mono', monospace !important;
-    font-size: 0.82rem !important;
-}
-[data-testid="stCheckbox"] input:checked + div {
-    background: #00ffb4 !important;
-    border-color: #00ffb4 !important;
+[data-testid="stButton"] > button:hover {
+    background: #1f1f1f !important;
+    border-color: #333 !important;
+    color: #ededed !important;
 }
 
-[data-testid="stSlider"] > div > div > div > div {
-    background: #00ffb4 !important;
+/* Primary button variant via key */
+[data-testid="stButton"]:has(button[kind="primary"]) > button,
+div[data-testid="stButton"] > button.primary {
+    background: #5b6af0 !important;
+    color: #fff !important;
+    border-color: transparent !important;
 }
 
-.stAlert { border-radius: 10px !important; font-family: 'Share Tech Mono', monospace !important; }
+/* ── Checkbox ── */
+[data-testid="stCheckbox"] label {
+    color: #666 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    gap: 8px !important;
+}
+[data-testid="stCheckbox"] input:checked ~ div svg { color: #5b6af0 !important; }
 
-[data-testid="stColumn"] { padding: 0 0.25rem !important; }
+/* ── Slider ── */
+[data-testid="stSlider"] label {
+    color: #444 !important;
+    font-size: 12px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+[data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] {
+    background: #5b6af0 !important;
+    border-color: #5b6af0 !important;
+}
+[data-testid="stSlider"] div[data-testid="stTickBarMin"],
+[data-testid="stSlider"] div[data-testid="stTickBarMax"] {
+    color: #333 !important;
+    font-size: 11px !important;
+}
+
+/* ── Empty state ── */
+.pp-empty {
+    text-align: center;
+    padding: 48px 24px;
+}
+.pp-empty-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: 0.3;
+}
+.pp-empty-text { font-size: 14px; color: #2a2a2a; }
+
+/* ── Footer ── */
+.pp-footer {
+    text-align: center;
+    padding: 32px 0 8px;
+    font-size: 11px;
+    color: #222;
+    letter-spacing: 0.05em;
+}
+
+/* ── Spinner ── */
+[data-testid="stSpinner"] { color: #444 !important; }
+
+/* ── Info box ── */
+.pp-info {
+    background: #111;
+    border: 1px solid #1c1c1c;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #444;
+    line-height: 1.6;
+    margin-top: 8px;
+}
+
+/* ── Toggle button special style ── */
+.pp-toggle { margin-top: 8px; }
 </style>
 """, unsafe_allow_html=True)
 
 
-# ── Core Logic ─────────────────────────────────────────────────────────────────
+# ── Logic ──────────────────────────────────────────────────────────────────────
 
-COMMON_PASSWORDS = {
-    "password", "123456", "password1", "qwerty", "abc123", "letmein",
-    "monkey", "master", "dragon", "111111", "baseball", "iloveyou",
-    "trustno1", "sunshine", "princess", "welcome", "shadow", "superman",
-    "michael", "football", "batman", "admin", "login", "passw0rd",
-    "p@ssword", "p@ssw0rd", "pa$$word", "pass123", "test123",
-    "qwerty123", "1q2w3e4r", "12345678", "1234567890", "password123",
-    "admin123", "root", "toor", "qwertyuiop", "asdfghjkl",
+COMMON = {
+    "password","123456","password1","qwerty","abc123","letmein","monkey",
+    "master","dragon","111111","baseball","iloveyou","trustno1","sunshine",
+    "princess","welcome","shadow","superman","michael","football","batman",
+    "admin","login","passw0rd","p@ssword","p@ssw0rd","pa$$word","pass123",
+    "test123","qwerty123","1q2w3e4r","12345678","1234567890","password123",
+    "admin123","root","toor","qwertyuiop","asdfghjkl","zxcvbnm","000000",
+    "654321","123123","666666","888888","1234567","12345","1234","123",
 }
+WALKS = ["qwerty","asdf","zxcv","qazwsx","1qaz","2wsx","qweasd",
+         "asdfgh","zxcvbn","123456","098765","qwertyuiop","asdfghjkl"]
+LEET  = str.maketrans("@4310$!5|", "aaeiossil")
 
-KEYBOARD_WALKS = [
-    "qwerty", "asdf", "zxcv", "qazwsx", "1qaz", "2wsx",
-    "qweasd", "asdfgh", "zxcvbn", "123456", "098765",
-    "qwertyuiop", "asdfghjkl",
-]
+def norm(p): return p.lower().translate(LEET)
 
-LEET_MAP = str.maketrans("@4310$!5|", "aaeiossil")
+def entropy(p):
+    pool = sum([26 if re.search(r"[a-z]",p) else 0,
+                26 if re.search(r"[A-Z]",p) else 0,
+                10 if re.search(r"\d",p)    else 0,
+                32 if re.search(r"[^a-zA-Z0-9]",p) else 0])
+    return 0.0 if pool == 0 else len(p) * math.log2(pool)
 
+def crack_time(e):
+    s = (2**e) / 1e10
+    if s < 1:         return "< 1 second"
+    if s < 60:        return f"{int(s)} sec"
+    if s < 3600:      return f"{int(s/60)} min"
+    if s < 86400:     return f"{int(s/3600)} hrs"
+    if s < 2592000:   return f"{int(s/86400)} days"
+    if s < 31536000:  return f"{int(s/2592000)} months"
+    y = s / 31536000
+    if y < 1000:      return f"{int(y)} years"
+    if y < 1_000_000: return f"{y/1000:.0f}K years"
+    return "Centuries"
 
-def normalize(pwd):
-    return pwd.lower().translate(LEET_MAP)
-
-
-def calculate_entropy(pwd):
-    pool = 0
-    if re.search(r"[a-z]", pwd): pool += 26
-    if re.search(r"[A-Z]", pwd): pool += 26
-    if re.search(r"\d", pwd):    pool += 10
-    if re.search(r"[^a-zA-Z0-9]", pwd): pool += 32
-    return 0.0 if pool == 0 else len(pwd) * math.log2(pool)
-
-
-def crack_time_display(entropy):
-    seconds = (2 ** entropy) / 1e10
-    if seconds < 1:           return "< 1 second ⚡"
-    if seconds < 60:          return f"{int(seconds)} seconds"
-    if seconds < 3600:        return f"{int(seconds/60)} minutes"
-    if seconds < 86400:       return f"{int(seconds/3600)} hours"
-    if seconds < 2592000:     return f"{int(seconds/86400)} days"
-    if seconds < 31536000:    return f"{int(seconds/2592000)} months"
-    years = seconds / 31536000
-    if years < 1000:          return f"{int(years)} years"
-    if years < 1_000_000:     return f"{years/1000:.1f}K years"
-    return "centuries+ 🛡️"
-
-
-def check_hibp(password):
-    sha1 = hashlib.sha1(password.encode("utf-8")).hexdigest().upper()
-    prefix, suffix = sha1[:5], sha1[5:]
+def check_hibp(pwd):
+    h = hashlib.sha1(pwd.encode()).hexdigest().upper()
+    pre, suf = h[:5], h[5:]
     try:
-        resp = requests.get(
-            f"https://api.pwnedpasswords.com/range/{prefix}",
-            headers={"User-Agent": "PassPulse-Checker"},
-            timeout=6,
-        )
-        if resp.status_code != 200:
-            return False, -1
-        for line in resp.text.splitlines():
-            h, count = line.split(":")
-            if h == suffix:
-                return True, int(count)
+        r = requests.get(f"https://api.pwnedpasswords.com/range/{pre}",
+                         headers={"User-Agent": "PassPulse"}, timeout=6)
+        if r.status_code != 200: return False, -1
+        for line in r.text.splitlines():
+            hh, c = line.split(":")
+            if hh == suf: return True, int(c)
         return False, 0
-    except Exception:
-        return False, -1
+    except: return False, -1
 
+def analyze(pwd):
+    if not pwd: return {}
+    n     = norm(pwd)
+    hasU  = bool(re.search(r"[A-Z]", pwd))
+    hasL  = bool(re.search(r"[a-z]", pwd))
+    hasD  = bool(re.search(r"\d", pwd))
+    hasS  = bool(re.search(r"[^a-zA-Z0-9]", pwd))
+    isCom = n in COMMON or pwd.lower() in COMMON
+    hasW  = any(w in n for w in WALKS)
+    hasR  = bool(re.search(r"(.)\1{2,}", pwd))
+    hasSq = bool(re.search(r"(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def)", n))
+    hasDt = bool(re.search(r"(19|20)\d{2}", pwd))
+    e     = entropy(pwd)
+    pool  = (26 if hasL else 0)+(26 if hasU else 0)+(10 if hasD else 0)+(32 if hasS else 0)
 
-def analyze_password(pwd):
-    if not pwd:
-        return {}
-    norm = normalize(pwd)
+    sc = 0
+    if len(pwd)>=8:  sc+=10
+    if len(pwd)>=12: sc+=10
+    if len(pwd)>=16: sc+=10
+    if len(pwd)>=20: sc+=5
+    if hasU: sc+=10
+    if hasL: sc+=10
+    if hasD: sc+=10
+    if hasS: sc+=15
+    if e>=50: sc+=10
+    if e>=70: sc+=10
+    if e>=90: sc+=5
+    if isCom: sc-=40
+    if hasW:  sc-=15
+    if hasR:  sc-=10
+    if hasSq: sc-=8
+    if hasDt: sc-=5
+    if len(pwd)<8: sc-=20
+    sc = max(0, min(100, sc))
 
-    has_upper   = bool(re.search(r"[A-Z]", pwd))
-    has_lower   = bool(re.search(r"[a-z]", pwd))
-    has_digit   = bool(re.search(r"\d", pwd))
-    has_special = bool(re.search(r"[^a-zA-Z0-9]", pwd))
-    is_common   = norm in COMMON_PASSWORDS or pwd.lower() in COMMON_PASSWORDS
-    has_walk    = any(w in norm for w in KEYBOARD_WALKS)
-    has_repeats = bool(re.search(r"(.)\1{2,}", pwd))
-    has_seq     = bool(re.search(r"(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi)", norm))
-    has_date    = bool(re.search(r"(19|20)\d{2}|(\d{2}[\/\-\.]\d{2}[\/\-\.]\d{2,4})", pwd))
-    e           = calculate_entropy(pwd)
-    pool        = (26 if has_lower else 0) + (26 if has_upper else 0) + (10 if has_digit else 0) + (32 if has_special else 0)
+    if   sc < 20: grade, color, bar = "Critically Weak", "#ef4444", "#ef4444"
+    elif sc < 40: grade, color, bar = "Weak",            "#f97316", "#f97316"
+    elif sc < 60: grade, color, bar = "Fair",            "#eab308", "#eab308"
+    elif sc < 80: grade, color, bar = "Strong",          "#22c55e", "#22c55e"
+    else:         grade, color, bar = "Very Strong",     "#5b6af0", "#5b6af0"
 
-    score = 0
-    if len(pwd) >= 8:  score += 10
-    if len(pwd) >= 12: score += 10
-    if len(pwd) >= 16: score += 10
-    if len(pwd) >= 20: score += 5
-    if has_upper:      score += 10
-    if has_lower:      score += 10
-    if has_digit:      score += 10
-    if has_special:    score += 15
-    if e >= 50:        score += 10
-    if e >= 70:        score += 10
-    if e >= 90:        score += 5
-    if is_common:      score -= 40
-    if has_walk:       score -= 15
-    if has_repeats:    score -= 10
-    if has_seq:        score -= 8
-    if has_date:       score -= 5
-    if len(pwd) < 8:   score -= 20
-    score = max(0, min(100, score))
+    sugg = []
+    if len(pwd)<12: sugg.append("Use at least 12 characters — 16 or more is ideal")
+    if not hasU:    sugg.append("Add uppercase letters (A–Z)")
+    if not hasL:    sugg.append("Add lowercase letters (a–z)")
+    if not hasD:    sugg.append("Include at least one number (0–9)")
+    if not hasS:    sugg.append("Add a special character like ! @ # $ % ^ & *")
+    if isCom:       sugg.append("This is a very common password — change it now")
+    if hasW:        sugg.append("Avoid keyboard patterns like qwerty or 12345")
+    if hasR:        sugg.append("Remove repeated characters like aaa or 111")
+    if hasSq:       sugg.append("Avoid sequences like abc or 123")
+    if hasDt:       sugg.append("Avoid using dates — they are easy to guess")
+    if not sugg:    sugg.append("No weaknesses detected. This is a strong password.")
 
-    if score < 20:   grade, color = "💀 Critically Weak", "#ef4444"
-    elif score < 40: grade, color = "⚠️ Weak",            "#f97316"
-    elif score < 60: grade, color = "🔶 Fair",            "#eab308"
-    elif score < 80: grade, color = "✅ Strong",          "#22c55e"
-    else:            grade, color = "🛡️ Fortress",        "#00ffb4"
+    checks = [
+        (len(pwd)>=12, f"Length — {len(pwd)} characters"),
+        (hasU,  "Uppercase letters"),
+        (hasL,  "Lowercase letters"),
+        (hasD,  "Numbers"),
+        (hasS,  "Special characters"),
+        (not isCom, "Not a common password"),
+        (not hasW,  "No keyboard patterns"),
+        (not hasR,  "No repeated characters"),
+        (not hasSq, "No sequential patterns"),
+        (not hasDt, "No date patterns"),
+    ]
 
-    suggestions = []
-    if len(pwd) < 12:  suggestions.append("→ Use at least 12 characters (16+ is ideal)")
-    if not has_upper:  suggestions.append("→ Add uppercase letters (A–Z)")
-    if not has_lower:  suggestions.append("→ Add lowercase letters (a–z)")
-    if not has_digit:  suggestions.append("→ Include numbers (0–9)")
-    if not has_special:suggestions.append("→ Add special characters like !@#$%^&*")
-    if is_common:      suggestions.append("→ This is a well-known password — change it immediately!")
-    if has_walk:       suggestions.append("→ Avoid keyboard patterns like 'qwerty' or '12345'")
-    if has_repeats:    suggestions.append("→ Avoid repeated characters like 'aaa' or '111'")
-    if has_seq:        suggestions.append("→ Avoid sequential patterns like 'abc' or '123'")
-    if has_date:       suggestions.append("→ Avoid dates — they are easy to guess")
-    if not suggestions:suggestions.append("✓ No obvious weaknesses detected. Great password!")
+    return dict(len=len(pwd), hasU=hasU, hasL=hasL, hasD=hasD, hasS=hasS,
+                isCom=isCom, hasW=hasW, hasR=hasR, hasSq=hasSq, hasDt=hasDt,
+                e=e, crack=crack_time(e), pool=pool, score=sc,
+                grade=grade, color=color, bar=bar, sugg=sugg, checks=checks)
 
-    return dict(
-        length=len(pwd), has_upper=has_upper, has_lower=has_lower,
-        has_digit=has_digit, has_special=has_special, is_common=is_common,
-        has_walk=has_walk, has_repeats=has_repeats, has_seq=has_seq,
-        has_date=has_date, entropy=e, crack_time=crack_time_display(e),
-        pool=pool, score=score, grade=grade, color=color, suggestions=suggestions,
-    )
-
-
-def generate_password(length=20, use_upper=True, use_digits=True, use_special=True):
-    lower   = string.ascii_lowercase
-    upper   = string.ascii_uppercase
-    digits  = string.digits
-    special = "!@#$%^&*()-_=+[]{}|;:,.<>?"
-    pool    = lower
-    req     = [secrets.choice(lower)]
-    if use_upper:   pool += upper;   req.append(secrets.choice(upper))
-    if use_digits:  pool += digits;  req.append(secrets.choice(digits))
-    if use_special: pool += special; req.append(secrets.choice(special))
-    rest = [secrets.choice(pool) for _ in range(length - len(req))]
-    all_chars = req + rest
-    secrets.SystemRandom().shuffle(all_chars)
-    return "".join(all_chars)
+def gen_password(length=20, upper=True, digits=True, special=True):
+    lo = string.ascii_lowercase
+    up = string.ascii_uppercase
+    di = string.digits
+    sp = "!@#$%^&*()-_=+[]|;:,.<>?"
+    pool, req = lo, [secrets.choice(lo)]
+    if upper:   pool+=up; req.append(secrets.choice(up))
+    if digits:  pool+=di; req.append(secrets.choice(di))
+    if special: pool+=sp; req.append(secrets.choice(sp))
+    rest = [secrets.choice(pool) for _ in range(length-len(req))]
+    out  = req+rest
+    secrets.SystemRandom().shuffle(out)
+    return "".join(out)
 
 
 # ── UI ─────────────────────────────────────────────────────────────────────────
 
+# Top bar
 st.markdown("""
-<div class="hero">
-    <div class="hero-tag">// security tool v1.0</div>
-    <div class="hero-title">PassPulse</div>
-    <div class="hero-sub">Real-time analysis · Breach detection · Entropy scoring</div>
+<div class="pp-topbar">
+    <div class="pp-wordmark">Pass<span>Pulse</span></div>
+    <div class="pp-badge">Password Checker</div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Password Input ─────────────────────────────────────────────────────────────
-st.markdown('<div class="card"><div class="card-title">// enter your password</div>', unsafe_allow_html=True)
+# Headline
+st.markdown("""
+<div style="margin-bottom: 36px;">
+    <div class="pp-headline">How strong is<br>your password?</div>
+    <div class="pp-sub">Real-time analysis, breach detection, and a score out of 100.</div>
+</div>
+""", unsafe_allow_html=True)
 
-show_pw = st.session_state.get("show_pw", False)
+# ── Input ──
+show = st.session_state.get("show", False)
 password = st.text_input(
-    "Password",
-    type="default" if show_pw else "password",
-    placeholder="Type your password here...",
+    "pw",
+    type="default" if show else "password",
+    placeholder="Enter your password",
     label_visibility="collapsed",
-    key="pw_input",
+    key="pw",
 )
 
-toggle_label = "🙈 Hide Password" if show_pw else "👁 Show Password"
-if st.button(toggle_label, key="toggle_btn"):
-    st.session_state["show_pw"] = not show_pw
-    st.rerun()
+col_a, col_b = st.columns([1, 1])
+with col_a:
+    if st.button("🙈 Hide" if show else "👁  Show", key="tog"):
+        st.session_state["show"] = not show
+        st.rerun()
 
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="pp-divider"></div>', unsafe_allow_html=True)
 
-# ── Analysis ───────────────────────────────────────────────────────────────────
+# ── Results ──
 if password:
-    d = analyze_password(password)
+    d = analyze(password)
 
-    # Strength bar
+    # Score + bar
     st.markdown(f"""
-    <div class="card">
-        <div class="card-title">// strength</div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:0.4rem;">
-            <span class="score-badge" style="background:{d['color']}22; color:{d['color']}; border:1px solid {d['color']}55;">{d['grade']}</span>
-            <span style="font-family:'Share Tech Mono',monospace; font-size:0.88rem; color:{d['color']}; font-weight:700;">{d['score']} / 100</span>
+    <div class="pp-score-row">
+        <span class="pp-grade" style="color:{d['color']};">{d['grade']}</span>
+        <span class="pp-score-num">{d['score']} / 100</span>
+    </div>
+    <div class="pp-bar-track">
+        <div class="pp-bar-fill" style="width:{d['score']}%; background:{d['bar']};"></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Stats
+    cc = "#ef4444" if d['score'] < 40 else ("#eab308" if d['score'] < 60 else "#22c55e")
+    st.markdown(f"""
+    <div class="pp-stats">
+        <div class="pp-stat">
+            <div class="pp-stat-label">Entropy</div>
+            <div class="pp-stat-value" style="color:#5b6af0;">{d['e']:.0f} bits</div>
         </div>
-        <div class="bar-wrap">
-            <div class="bar-fill" style="width:{d['score']}%; background:linear-gradient(90deg,{d['color']},{d['color']}99);"></div>
+        <div class="pp-stat">
+            <div class="pp-stat-label">Crack Time</div>
+            <div class="pp-stat-value" style="color:{cc}; font-size:clamp(13px,3vw,18px);">{d['crack']}</div>
+        </div>
+        <div class="pp-stat">
+            <div class="pp-stat-label">Length</div>
+            <div class="pp-stat-value">{d['len']}</div>
+        </div>
+        <div class="pp-stat">
+            <div class="pp-stat-label">Character pool</div>
+            <div class="pp-stat-value">{d['pool']}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Metrics
-    crack_color = "#f87171" if d['score'] < 40 else "#34d399"
-    st.markdown(f"""
-    <div class="metric-grid">
-        <div class="metric-box">
-            <div class="metric-label">Entropy</div>
-            <div class="metric-value" style="color:#00ffb4;">{d['entropy']:.1f} bits</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Crack Time</div>
-            <div class="metric-value" style="color:{crack_color}; font-size:clamp(0.78rem,2.2vw,1rem);">{d['crack_time']}</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Length</div>
-            <div class="metric-value">{d['length']} chars</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Char Pool</div>
-            <div class="metric-value" style="color:#00ffb4;">{d['pool']}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="pp-divider"></div>', unsafe_allow_html=True)
 
     # Checklist
-    checks = [
-        (d["length"] >= 12,  f"Length ≥ 12  ({d['length']} chars)"),
-        (d["has_upper"],      "Uppercase letters (A–Z)"),
-        (d["has_lower"],      "Lowercase letters (a–z)"),
-        (d["has_digit"],      "Numbers (0–9)"),
-        (d["has_special"],    "Special characters (!@#$...)"),
-        (not d["is_common"],  "Not a common password"),
-        (not d["has_walk"],   "No keyboard walk patterns"),
-        (not d["has_repeats"],"No repeated characters"),
-        (not d["has_seq"],    "No sequential patterns"),
-        (not d["has_date"],   "No date patterns"),
-    ]
-    items = "".join(
-        f'<div class="check-item"><div class="check-dot" style="background:{"#34d399" if ok else "#f87171"};"></div>'
-        f'<span style="color:{"#34d399" if ok else "#f87171"};">{"✓" if ok else "✗"} {label}</span></div>'
-        for ok, label in checks
-    )
-    st.markdown(f'<div class="card"><div class="card-title">// checklist</div>{items}</div>', unsafe_allow_html=True)
+    st.markdown('<div class="pp-label">Checklist</div>', unsafe_allow_html=True)
+    items = ""
+    for ok, label in d["checks"]:
+        ic  = "pp-check-pass" if ok else "pp-check-fail"
+        tc  = "pp-check-text-pass" if ok else "pp-check-text-fail"
+        sym = "✓" if ok else "✕"
+        items += f'<div class="pp-check"><div class="pp-check-icon {ic}">{sym}</div><span class="{tc}">{label}</span></div>'
+    st.markdown(f'<div class="pp-checks">{items}</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="pp-divider"></div>', unsafe_allow_html=True)
 
     # Suggestions
-    if d["suggestions"]:
-        suggs = "".join(f'<div class="suggestion">{s}</div>' for s in d["suggestions"])
-        st.markdown(f'<div class="card"><div class="card-title">// recommendations</div>{suggs}</div>', unsafe_allow_html=True)
+    st.markdown('<div class="pp-label">Suggestions</div>', unsafe_allow_html=True)
+    suggs = ""
+    all_good = len(d["sugg"]) == 1 and "No weaknesses" in d["sugg"][0]
+    for s in d["sugg"]:
+        dot_cls  = "pp-suggestion-dot-ok" if all_good else "pp-suggestion-dot"
+        text_cls = "pp-suggestion-ok"     if all_good else ""
+        suggs += f'<div class="pp-suggestion"><div class="pp-suggestion-dot {dot_cls}"></div><span class="{text_cls}">{s}</span></div>'
+    st.markdown(f'<div class="pp-suggestions">{suggs}</div>', unsafe_allow_html=True)
 
-    # Breach Check
+    st.markdown('<div class="pp-divider"></div>', unsafe_allow_html=True)
+
+    # Breach check
+    st.markdown('<div class="pp-label">Data Breach Check</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div class="card">
-        <div class="card-title">// data breach check</div>
-        <div style="font-family:'Share Tech Mono',monospace; font-size:0.72rem; color:#4b5563; margin-bottom:0.9rem; line-height:1.6;">
-            🔒 Privacy-safe — only a 5-character hash prefix is sent to Have I Been Pwned.<br>
-            Your actual password never leaves your device.
-        </div>
+    <div class="pp-breach-note">
+        Checks against 900M+ compromised passwords via Have I Been Pwned.<br>
+        Only a 5-character hash prefix is sent — your password never leaves your device.
+    </div>
     """, unsafe_allow_html=True)
 
-    if st.button("🔍 Check Against Data Breaches", key="breach_btn"):
-        with st.spinner("Checking against 900M+ breached passwords..."):
+    if st.button("Check for breaches →", key="breach"):
+        with st.spinner("Checking..."):
             pwned, count = check_hibp(password)
         if count == -1:
-            st.warning("⚡ Could not reach the HIBP API. Check your internet connection.")
+            st.warning("Could not reach the API. Check your connection.")
         elif pwned:
-            st.markdown(f'<div class="breach-danger">🚨 PWNED! Found in <strong>{count:,}</strong> data breach(es).<br>Stop using this password immediately.</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="pp-breach pp-breach-danger">Found in <strong>{count:,} data breaches.</strong> Stop using this password immediately.</div>', unsafe_allow_html=True)
         else:
-            st.markdown('<div class="breach-safe">✅ Not found in any known data breaches.<br>This password has not been publicly exposed.</div>', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('<div class="pp-breach pp-breach-safe">Not found in any known breaches. You\'re clear.</div>', unsafe_allow_html=True)
 
 else:
     st.markdown("""
-    <div class="empty-state">
-        <div class="empty-icon">🔐</div>
-        Type a password above to see your full analysis<br>
-        <span style="font-size:0.7rem; color:#1f2937;">strength · entropy · crack time · breach check</span>
+    <div class="pp-empty">
+        <div class="pp-empty-icon">🔐</div>
+        <div class="pp-empty-text">Enter a password above to see your analysis</div>
     </div>
     """, unsafe_allow_html=True)
 
-# ── Generator ──────────────────────────────────────────────────────────────────
-st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-st.markdown('<div class="card"><div class="card-title">// password generator</div>', unsafe_allow_html=True)
+# ── Generator ──
+st.markdown('<div class="pp-divider"></div>', unsafe_allow_html=True)
+st.markdown('<div class="pp-label">Password Generator</div>', unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    use_upper   = st.checkbox("Uppercase", value=True)
-with col2:
-    use_digits  = st.checkbox("Numbers",   value=True)
-with col3:
-    use_special = st.checkbox("Symbols",   value=True)
+c1, c2, c3 = st.columns(3)
+with c1: use_upper   = st.checkbox("Uppercase", value=True)
+with c2: use_digits  = st.checkbox("Numbers",   value=True)
+with c3: use_special = st.checkbox("Symbols",   value=True)
 
-pw_length = st.slider("Password Length", min_value=8, max_value=64, value=20, step=1)
+pw_len = st.slider("Length", min_value=8, max_value=64, value=20, step=1, label_visibility="collapsed")
+st.markdown(f'<div class="pp-gen-meta" style="margin-bottom:10px;">Length: <span>{pw_len} characters</span></div>', unsafe_allow_html=True)
 
-if st.button("⚡ Generate Strong Password", key="gen_btn"):
-    st.session_state["gen_pw"] = generate_password(pw_length, use_upper, use_digits, use_special)
+if st.button("Generate password", key="gen"):
+    st.session_state["gpw"] = gen_password(pw_len, use_upper, use_digits, use_special)
 
-if "gen_pw" in st.session_state:
-    gen_pw   = st.session_state["gen_pw"]
-    gen_data = analyze_password(gen_pw)
-    st.markdown(f'<div class="gen-box">{gen_pw}</div>', unsafe_allow_html=True)
-    st.markdown(f"""
-    <div style="text-align:center; font-family:'Share Tech Mono',monospace; font-size:0.75rem; color:#4b5563; margin-bottom:0.5rem;">
-        <span style="color:{gen_data['color']};">{gen_data['grade']}</span>
-        &nbsp;·&nbsp; {gen_data['entropy']:.0f} bits
-        &nbsp;·&nbsp; {gen_data['crack_time']}
-    </div>
-    <div class="tip-box">
-        💡 <strong>Tip:</strong> Copy this password and store it in a password manager like Bitwarden or 1Password.
-        Never save passwords in notes or messages.
-    </div>
-    """, unsafe_allow_html=True)
+if "gpw" in st.session_state:
+    gd = analyze(st.session_state["gpw"])
+    st.markdown(f'<div class="pp-gen-output">{st.session_state["gpw"]}</div>', unsafe_allow_html=True)
+    if gd:
+        st.markdown(f"""
+        <div class="pp-gen-meta">
+            <span style="color:{gd['color']};">{gd['grade']}</span>
+            &nbsp;·&nbsp; {gd['e']:.0f} bits entropy
+            &nbsp;·&nbsp; Crack time: {gd['crack']}
+        </div>
+        <div class="pp-info" style="margin-top:10px;">
+            Save this in a password manager like <strong style="color:#555;">Bitwarden</strong> or <strong style="color:#555;">1Password</strong>. Never store passwords in notes or messages.
+        </div>
+        """, unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ── Footer ─────────────────────────────────────────────────────────────────────
+# Footer
 st.markdown("""
-<div style="text-align:center; padding:1.8rem 0 0.8rem; font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:#1f2937; letter-spacing:0.12em;">
-    PASSPULSE · BUILT WITH PYTHON + STREAMLIT · YOUR PASSWORDS ARE NEVER STORED OR TRANSMITTED
+<div class="pp-footer">
+    PASSPULSE &nbsp;·&nbsp; YOUR PASSWORDS ARE NEVER STORED OR SENT IN FULL
 </div>
 """, unsafe_allow_html=True)
