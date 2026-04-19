@@ -39,7 +39,13 @@ html, body,
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 99px; }
 
-.pp-wordmark { font-size: 13px; font-weight: 600; color: #ededed; letter-spacing: -0.01em; }
+/* ── Typography ── */
+.pp-wordmark {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ededed;
+    letter-spacing: -0.01em;
+}
 .pp-wordmark span { color: #5b6af0; }
 
 .pp-headline {
@@ -49,14 +55,20 @@ html, body,
     line-height: 1.15;
     color: #ffffff;
 }
-.pp-sub { font-size: 13px; color: #777; margin-top: 6px; }
+.pp-sub {
+    font-size: 13px;
+    color: #777;
+    margin-top: 6px;
+    letter-spacing: 0.01em;
+}
 
+/* ── Layout ── */
 .pp-topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 20px 0 40px;
-    border-bottom: 1px solid #1e1e1e;
+    border-bottom: 1px solid #1a1a1a;
     margin-bottom: 40px;
 }
 .pp-badge {
@@ -64,15 +76,18 @@ html, body,
     font-weight: 500;
     color: #666;
     background: #181818;
-    border: 1px solid #2a2a2a;
+    border: 1px solid #222;
     border-radius: 99px;
     padding: 3px 10px;
+    letter-spacing: 0.02em;
 }
+
+.pp-section { margin-bottom: 10px; }
 
 .pp-label {
     font-size: 11px;
     font-weight: 500;
-    color: #777;
+    color: #666;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 10px;
@@ -81,59 +96,74 @@ html, body,
 /* ── Input ── */
 [data-testid="stTextInput"] > div > div > input {
     background: #111 !important;
-    border: 1px solid #252525 !important;
+    border: 1px solid #222 !important;
     border-radius: 10px !important;
     color: #ededed !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 15px !important;
+    font-weight: 400 !important;
     padding: 12px 16px !important;
     width: 100% !important;
-    transition: border-color 0.15s !important;
+    transition: border-color 0.15s ease !important;
     caret-color: #5b6af0;
+    letter-spacing: 0.02em;
 }
 [data-testid="stTextInput"] > div > div > input:focus {
-    border-color: #333 !important;
+    border-color: #2d2d2d !important;
     box-shadow: 0 0 0 3px rgba(91,106,240,0.08) !important;
     outline: none !important;
 }
-[data-testid="stTextInput"] > div > div > input::placeholder { color: #444 !important; }
+[data-testid="stTextInput"] > div > div > input::placeholder { color: #333 !important; }
 [data-testid="stTextInput"] button { display: none !important; }
 [data-testid="stTextInput"] label { display: none !important; }
 
-/* ── Bar ── */
+/* ── Strength bar ── */
 .pp-bar-track {
     height: 3px;
-    background: #1e1e1e;
+    background: #1a1a1a;
     border-radius: 99px;
     overflow: hidden;
-    margin: 14px 0 5px;
+    margin: 16px 0 6px;
 }
-.pp-bar-fill { height: 100%; border-radius: 99px; }
+.pp-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+}
 
+/* ── Score row ── */
 .pp-score-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 4px;
 }
-.pp-grade { font-size: 13px; font-weight: 500; }
-.pp-score-num { font-size: 12px; color: #666; font-variant-numeric: tabular-nums; }
+.pp-grade {
+    font-size: 13px;
+    font-weight: 500;
+}
+.pp-score-num {
+    font-size: 12px;
+    color: #444;
+    font-variant-numeric: tabular-nums;
+}
 
-/* ── Stats ── */
+/* ── Stat grid ── */
 .pp-stats {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    margin: 22px 0;
+    margin: 24px 0;
 }
 .pp-stat {
     background: #111;
-    border: 1px solid #1e1e1e;
+    border: 1px solid #1c1c1c;
     border-radius: 10px;
     padding: 14px 16px;
 }
 .pp-stat-label {
     font-size: 11px;
-    color: #666;
+    color: #444;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -149,52 +179,62 @@ html, body,
 }
 
 /* ── Divider ── */
-.pp-divider { height: 1px; background: #1e1e1e; margin: 26px 0; }
+.pp-divider {
+    height: 1px;
+    background: #1a1a1a;
+    margin: 28px 0;
+}
 
 /* ── Checklist ── */
-.pp-checks { display: flex; flex-direction: column; }
+.pp-checks { display: flex; flex-direction: column; gap: 2px; }
 .pp-check {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #161616;
+    padding: 7px 0;
+    border-bottom: 1px solid #141414;
     font-size: 13px;
 }
 .pp-check:last-child { border-bottom: none; }
 .pp-check-icon {
-    width: 18px; height: 18px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; flex-shrink: 0; font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    font-weight: 700;
 }
-.pp-check-pass { background: rgba(52,211,153,0.12); color: #34d399; }
-.pp-check-fail { background: rgba(239,68,68,0.1); color: #f87171; }
+.pp-check-pass { background: rgba(52,211,153,0.1); color: #34d399; }
+.pp-check-fail { background: rgba(239,68,68,0.1); color: #ef4444; }
 .pp-check-text-pass { color: #ccc; }
 .pp-check-text-fail { color: #777; }
 
 /* ── Suggestions ── */
-.pp-suggestions { display: flex; flex-direction: column; gap: 6px; }
+.pp-suggestions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 .pp-suggestion {
     display: flex;
     align-items: flex-start;
     gap: 10px;
     padding: 10px 12px;
     background: #111;
-    border: 1px solid #1e1e1e;
+    border: 1px solid #1c1c1c;
     border-radius: 8px;
     font-size: 13px;
     color: #aaa;
-    line-height: 1.55;
+    line-height: 1.5;
 }
 .pp-suggestion-dot {
-    width: 5px; height: 5px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: #f59e0b;
     flex-shrink: 0;
-    margin-top: 7px;
+    margin-top: 6px;
 }
-.pp-suggestion-ok { color: #6ee7b7; }
+.pp-suggestion-ok { color: #34d399; }
 .pp-suggestion-dot-ok { background: #34d399; }
 
 /* ── Breach ── */
@@ -207,20 +247,25 @@ html, body,
 }
 .pp-breach-safe {
     background: rgba(52,211,153,0.05);
-    border: 1px solid rgba(52,211,153,0.2);
+    border: 1px solid rgba(52,211,153,0.15);
     color: #6ee7b7;
 }
 .pp-breach-danger {
     background: rgba(239,68,68,0.05);
-    border: 1px solid rgba(239,68,68,0.2);
+    border: 1px solid rgba(239,68,68,0.15);
     color: #fca5a5;
 }
-.pp-breach-note { font-size: 12px; color: #555; margin-bottom: 14px; line-height: 1.6; }
+.pp-breach-note {
+    font-size: 12px;
+    color: #333;
+    margin-bottom: 14px;
+    line-height: 1.6;
+}
 
 /* ── Generator ── */
 .pp-gen-output {
     background: #111;
-    border: 1px solid #252525;
+    border: 1px solid #222;
     border-radius: 10px;
     padding: 16px;
     font-family: 'SF Mono', 'Fira Code', monospace;
@@ -231,62 +276,106 @@ html, body,
     margin: 14px 0 8px;
     letter-spacing: 0.03em;
 }
-.pp-gen-meta { font-size: 12px; color: #555; margin-top: 6px; }
-.pp-gen-meta span { color: #777; }
-.pp-info {
-    background: #111;
-    border: 1px solid #1e1e1e;
-    border-radius: 8px;
-    padding: 10px 14px;
+.pp-gen-meta {
     font-size: 12px;
-    color: #666;
-    line-height: 1.6;
-    margin-top: 8px;
+    color: #333;
+    margin-top: 6px;
 }
-
-/* ── Empty ── */
-.pp-empty { text-align: center; padding: 48px 24px; }
-.pp-empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.2; }
-.pp-empty-text { font-size: 14px; color: #333; }
-
-/* ── Footer ── */
-.pp-footer {
-    text-align: center;
-    padding: 32px 0 8px;
-    font-size: 11px;
-    color: #2a2a2a;
-    letter-spacing: 0.05em;
-}
+.pp-gen-meta span { color: #555; }
 
 /* ── Buttons ── */
 [data-testid="stButton"] > button {
-    background: #161616 !important;
-    color: #bbb !important;
-    border: 1px solid #272727 !important;
+    background: #181818 !important;
+    color: #ccc !important;
+    border: 1px solid #252525 !important;
     border-radius: 8px !important;
     font-family: 'Inter', sans-serif !important;
     font-weight: 500 !important;
     font-size: 13px !important;
     padding: 9px 16px !important;
     width: 100% !important;
-    transition: all 0.15s !important;
+    transition: background 0.15s, border-color 0.15s, color 0.15s !important;
     letter-spacing: 0.01em !important;
+    cursor: pointer !important;
 }
 [data-testid="stButton"] > button:hover {
-    background: #1e1e1e !important;
+    background: #1f1f1f !important;
     border-color: #333 !important;
     color: #ededed !important;
 }
 
-/* ── Checkbox ── */
-[data-testid="stCheckbox"] label {
-    color: #888 !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 13px !important;
+/* Primary button variant via key */
+[data-testid="stButton"]:has(button[kind="primary"]) > button,
+div[data-testid="stButton"] > button.primary {
+    background: #5b6af0 !important;
+    color: #fff !important;
+    border-color: transparent !important;
 }
 
+/* ── Checkbox ── */
+[data-testid="stCheckbox"] label {
+    color: #666 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    gap: 8px !important;
+}
+[data-testid="stCheckbox"] input:checked ~ div svg { color: #5b6af0 !important; }
+
 /* ── Slider ── */
-[data-testid="stSlider"] label { color: #666 !important; font-size: 12px !important; }
+[data-testid="stSlider"] label {
+    color: #444 !important;
+    font-size: 12px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+[data-testid="stSlider"] [data-baseweb="slider"] div[role="slider"] {
+    background: #5b6af0 !important;
+    border-color: #5b6af0 !important;
+}
+[data-testid="stSlider"] div[data-testid="stTickBarMin"],
+[data-testid="stSlider"] div[data-testid="stTickBarMax"] {
+    color: #333 !important;
+    font-size: 11px !important;
+}
+
+/* ── Empty state ── */
+.pp-empty {
+    text-align: center;
+    padding: 48px 24px;
+}
+.pp-empty-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: 0.3;
+}
+.pp-empty-text { font-size: 14px; color: #2a2a2a; }
+
+/* ── Footer ── */
+.pp-footer {
+    text-align: center;
+    padding: 32px 0 8px;
+    font-size: 11px;
+    color: #222;
+    letter-spacing: 0.05em;
+}
+
+/* ── Spinner ── */
+[data-testid="stSpinner"] { color: #444 !important; }
+
+/* ── Info box ── */
+.pp-info {
+    background: #111;
+    border: 1px solid #1c1c1c;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #444;
+    line-height: 1.6;
+    margin-top: 8px;
+}
+
+/* ── Toggle button special style ── */
+.pp-toggle { margin-top: 8px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -318,9 +407,9 @@ def entropy(p):
 def crack_time(e):
     s = (2**e) / 1e10
     if s < 1:         return "< 1 second"
-    if s < 60:        return f"{int(s)} seconds"
-    if s < 3600:      return f"{int(s/60)} minutes"
-    if s < 86400:     return f"{int(s/3600)} hours"
+    if s < 60:        return f"{int(s)} sec"
+    if s < 3600:      return f"{int(s/60)} min"
+    if s < 86400:     return f"{int(s/3600)} hrs"
     if s < 2592000:   return f"{int(s/86400)} days"
     if s < 31536000:  return f"{int(s/2592000)} months"
     y = s / 31536000
@@ -376,11 +465,11 @@ def analyze(pwd):
     if len(pwd)<8: sc-=20
     sc = max(0, min(100, sc))
 
-    if   sc < 20: grade, color = "Critically Weak", "#ef4444"
-    elif sc < 40: grade, color = "Weak",            "#f97316"
-    elif sc < 60: grade, color = "Fair",            "#eab308"
-    elif sc < 80: grade, color = "Strong",          "#22c55e"
-    else:         grade, color = "Very Strong",     "#5b6af0"
+    if   sc < 20: grade, color, bar = "Critically Weak", "#ef4444", "#ef4444"
+    elif sc < 40: grade, color, bar = "Weak",            "#f97316", "#f97316"
+    elif sc < 60: grade, color, bar = "Fair",            "#eab308", "#eab308"
+    elif sc < 80: grade, color, bar = "Strong",          "#22c55e", "#22c55e"
+    else:         grade, color, bar = "Very Strong",     "#5b6af0", "#5b6af0"
 
     sugg = []
     if len(pwd)<12: sugg.append("Use at least 12 characters — 16 or more is ideal")
@@ -411,7 +500,7 @@ def analyze(pwd):
     return dict(len=len(pwd), hasU=hasU, hasL=hasL, hasD=hasD, hasS=hasS,
                 isCom=isCom, hasW=hasW, hasR=hasR, hasSq=hasSq, hasDt=hasDt,
                 e=e, crack=crack_time(e), pool=pool, score=sc,
-                grade=grade, color=color, sugg=sugg, checks=checks)
+                grade=grade, color=color, bar=bar, sugg=sugg, checks=checks)
 
 def gen_password(length=20, upper=True, digits=True, special=True):
     lo = string.ascii_lowercase
@@ -427,15 +516,8 @@ def gen_password(length=20, upper=True, digits=True, special=True):
     secrets.SystemRandom().shuffle(out)
     return "".join(out)
 
-# ── on_change callback — fires on every keystroke ──────────────────────────────
-def on_pw_change():
-    st.session_state["pw_value"] = st.session_state["pw_input"]
 
 # ── UI ─────────────────────────────────────────────────────────────────────────
-
-# init
-if "pw_value" not in st.session_state: st.session_state["pw_value"] = ""
-if "show"     not in st.session_state: st.session_state["show"]     = False
 
 # Top bar
 st.markdown("""
@@ -447,33 +529,31 @@ st.markdown("""
 
 # Headline
 st.markdown("""
-<div style="margin-bottom: 32px;">
+<div style="margin-bottom: 36px;">
     <div class="pp-headline">How strong is<br>your password?</div>
     <div class="pp-sub">Real-time analysis, breach detection, and a score out of 100.</div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Input — on_change fires on every keystroke ──
-st.text_input(
+# ── Input ──
+show = st.session_state.get("show", False)
+password = st.text_input(
     "pw",
-    type="default" if st.session_state["show"] else "password",
-    placeholder="Start typing your password...",
+    type="default" if show else "password",
+    placeholder="Enter your password",
     label_visibility="collapsed",
-    key="pw_input",
-    on_change=on_pw_change,
+    key="pw",
 )
 
-if st.button("🙈 Hide password" if st.session_state["show"] else "👁  Show password", key="tog"):
-    st.session_state["show"] = not st.session_state["show"]
-    # preserve the typed value across the rerun
-    st.session_state["pw_input"] = st.session_state["pw_value"]
-    st.rerun()
+col_a, col_b = st.columns([1, 1])
+with col_a:
+    if st.button("🙈 Hide" if show else "👁  Show", key="tog"):
+        st.session_state["show"] = not show
+        st.rerun()
 
 st.markdown('<div class="pp-divider"></div>', unsafe_allow_html=True)
 
-# ── Live results ──
-password = st.session_state["pw_value"]
-
+# ── Results ──
 if password:
     d = analyze(password)
 
@@ -484,7 +564,7 @@ if password:
         <span class="pp-score-num">{d['score']} / 100</span>
     </div>
     <div class="pp-bar-track">
-        <div class="pp-bar-fill" style="width:{d['score']}%; background:{d['color']};"></div>
+        <div class="pp-bar-fill" style="width:{d['score']}%; background:{d['bar']};"></div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -527,8 +607,8 @@ if password:
 
     # Suggestions
     st.markdown('<div class="pp-label">Suggestions</div>', unsafe_allow_html=True)
-    all_good = len(d["sugg"]) == 1 and "No weaknesses" in d["sugg"][0]
     suggs = ""
+    all_good = len(d["sugg"]) == 1 and "No weaknesses" in d["sugg"][0]
     for s in d["sugg"]:
         dot_cls  = "pp-suggestion-dot-ok" if all_good else "pp-suggestion-dot"
         text_cls = "pp-suggestion-ok"     if all_good else ""
@@ -542,7 +622,7 @@ if password:
     st.markdown("""
     <div class="pp-breach-note">
         Checks against 900M+ compromised passwords via Have I Been Pwned.<br>
-        Only a 5-character hash prefix is sent — your actual password never leaves your device.
+        Only a 5-character hash prefix is sent — your password never leaves your device.
     </div>
     """, unsafe_allow_html=True)
 
@@ -550,17 +630,17 @@ if password:
         with st.spinner("Checking..."):
             pwned, count = check_hibp(password)
         if count == -1:
-            st.warning("Could not reach the API. Check your internet connection.")
+            st.warning("Could not reach the API. Check your connection.")
         elif pwned:
             st.markdown(f'<div class="pp-breach pp-breach-danger">Found in <strong>{count:,} data breaches.</strong> Stop using this password immediately.</div>', unsafe_allow_html=True)
         else:
-            st.markdown('<div class="pp-breach pp-breach-safe">Not found in any known data breaches. You\'re clear.</div>', unsafe_allow_html=True)
+            st.markdown('<div class="pp-breach pp-breach-safe">Not found in any known breaches. You\'re clear.</div>', unsafe_allow_html=True)
 
 else:
     st.markdown("""
     <div class="pp-empty">
         <div class="pp-empty-icon">🔐</div>
-        <div class="pp-empty-text">Start typing to see your analysis</div>
+        <div class="pp-empty-text">Enter a password above to see your analysis</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -590,8 +670,7 @@ if "gpw" in st.session_state:
             &nbsp;·&nbsp; Crack time: {gd['crack']}
         </div>
         <div class="pp-info" style="margin-top:10px;">
-            Save this in a password manager like <strong style="color:#888;">Bitwarden</strong> or <strong style="color:#888;">1Password</strong>.
-            Never store passwords in notes or messages.
+            Save this in a password manager like <strong style="color:#555;">Bitwarden</strong> or <strong style="color:#555;">1Password</strong>. Never store passwords in notes or messages.
         </div>
         """, unsafe_allow_html=True)
 
