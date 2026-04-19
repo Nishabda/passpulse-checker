@@ -283,6 +283,88 @@ html, body,
 }
 .pp-gen-meta span { color: #555; }
 
+/* ── Copy button ── */
+.pp-copy-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 14px 0 8px;
+}
+.pp-gen-output-inline {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 14px;
+    color: #ededed;
+    word-break: break-all;
+    line-height: 1.7;
+    letter-spacing: 0.03em;
+    flex: 1;
+}
+.pp-copy-btn {
+    background: #181818;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: #888;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+.pp-copy-btn:hover { background: #222; color: #ccc; border-color: #333; }
+.pp-copy-btn.copied { color: #34d399; border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.05); }
+
+/* ── History ── */
+.pp-history { display: flex; flex-direction: column; gap: 6px; }
+.pp-history-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #111;
+    border: 1px solid #1c1c1c;
+    border-radius: 8px;
+    gap: 12px;
+}
+.pp-history-pw {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    color: #ccc;
+    word-break: break-all;
+    flex: 1;
+    letter-spacing: 0.02em;
+}
+.pp-history-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.pp-history-grade {
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.pp-history-score {
+    font-size: 11px;
+    color: #444;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.pp-history-empty {
+    font-size: 13px;
+    color: #333;
+    text-align: center;
+    padding: 20px 0;
+}
+
 /* ── Buttons ── */
 [data-testid="stButton"] > button {
     background: #181818 !important;
@@ -657,11 +739,42 @@ pw_len = st.slider("Length", min_value=8, max_value=64, value=20, step=1, label_
 st.markdown(f'<div class="pp-gen-meta" style="margin-bottom:10px;">Length: <span>{pw_len} characters</span></div>', unsafe_allow_html=True)
 
 if st.button("Generate password", key="gen"):
-    st.session_state["gpw"] = gen_password(pw_len, use_upper, use_digits, use_special)
+    new_pw = gen_password(pw_len, use_upper, use_digits, use_special)
+    st.session_state["gpw"] = new_pw
+    # Add to history (max 5, no duplicates)
+    if "history" not in st.session_state:
+        st.session_state["history"] = []
+    if new_pw not in [h["pw"] for h in st.session_state["history"]]:
+        gd_new = analyze(new_pw)
+        st.session_state["history"].insert(0, {
+            "pw":    new_pw,
+            "grade": gd_new["grade"],
+            "color": gd_new["color"],
+            "score": gd_new["score"],
+        })
+        st.session_state["history"] = st.session_state["history"][:5]
 
 if "gpw" in st.session_state:
     gd = analyze(st.session_state["gpw"])
-    st.markdown(f'<div class="pp-gen-output">{st.session_state["gpw"]}</div>', unsafe_allow_html=True)
+    gpw = st.session_state["gpw"]
+
+    # Copy button via HTML + JS
+    st.markdown(f"""
+    <div class="pp-copy-wrap">
+        <div class="pp-gen-output-inline" id="gen-pw-text">{gpw}</div>
+        <button class="pp-copy-btn" id="copy-btn" onclick="
+            navigator.clipboard.writeText('{gpw}').then(() => {{
+                this.textContent = '✓ Copied';
+                this.classList.add('copied');
+                setTimeout(() => {{
+                    this.textContent = 'Copy';
+                    this.classList.remove('copied');
+                }}, 2000);
+            }});
+        ">Copy</button>
+    </div>
+    """, unsafe_allow_html=True)
+
     if gd:
         st.markdown(f"""
         <div class="pp-gen-meta">
@@ -670,9 +783,33 @@ if "gpw" in st.session_state:
             &nbsp;·&nbsp; Crack time: {gd['crack']}
         </div>
         <div class="pp-info" style="margin-top:10px;">
-            Save this in a password manager like <strong style="color:#555;">Bitwarden</strong> or <strong style="color:#555;">1Password</strong>. Never store passwords in notes or messages.
+            Save this in a password manager like <strong style="color:#666;">Bitwarden</strong> or <strong style="color:#666;">1Password</strong>. Never store passwords in notes or messages.
         </div>
         """, unsafe_allow_html=True)
+
+# ── History ──
+st.markdown('<div class="pp-divider"></div>', unsafe_allow_html=True)
+st.markdown('<div class="pp-label">Generated History</div>', unsafe_allow_html=True)
+
+history = st.session_state.get("history", [])
+if not history:
+    st.markdown('<div class="pp-history-empty">No passwords generated yet</div>', unsafe_allow_html=True)
+else:
+    rows = ""
+    for h in history:
+        rows += f"""
+        <div class="pp-history-row">
+            <div class="pp-history-pw">{h['pw']}</div>
+            <div class="pp-history-meta">
+                <span class="pp-history-grade" style="color:{h['color']};">{h['grade']}</span>
+                <span class="pp-history-score">{h['score']}/100</span>
+            </div>
+        </div>"""
+    st.markdown(f'<div class="pp-history">{rows}</div>', unsafe_allow_html=True)
+
+    if st.button("Clear history", key="clear_hist"):
+        st.session_state["history"] = []
+        st.rerun()
 
 # Footer
 st.markdown("""
